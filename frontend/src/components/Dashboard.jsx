@@ -106,7 +106,7 @@ function Dashboard({ analytics }) {
       const employeeName = getColumnValue(item, 'Employee name', 'dropdown_mm2641v5') || item.name;
       
       // Get manager from columns
-      const manager = getColumnValue(item, 'Manager', 'dropdown_mm1zvc1j');
+      const manager = getColumnValue(item, 'Manager', 'dropdown_mm3g96wg');
       
       // Search text filter (employee name or manager)
       if (overviewFilters.searchText) {
@@ -183,7 +183,7 @@ function Dashboard({ analytics }) {
       // Get values from columns
       const status = getColumnValue(item, null, null, 'status');
       const employeeName = getColumnValue(item, 'Employee name', 'dropdown_mm2641v5') || item.name || 'Unknown';
-      const manager = getColumnValue(item, 'Manager', 'dropdown_mm1zvc1j');
+      const manager = getColumnValue(item, 'Manager', 'dropdown_mm3g96wg');
       const forecastWindow = getColumnValue(item, 'Forecast Window');
       
       const startDateColumn = Object.values(item.columns || {}).find(col =>
@@ -317,7 +317,7 @@ function Dashboard({ analytics }) {
     // Prepare data for export
     const exportData = overviewFilteredItems.map(item => {
       const employeeName = getColumnValue(item, 'Employee name', 'dropdown_mm2641v5') || item.name;
-      const manager = getColumnValue(item, 'Manager', 'dropdown_mm1zvc1j');
+      const manager = getColumnValue(item, 'Manager', 'dropdown_mm3g96wg');
       const status = getColumnValue(item, null, null, 'status');
       const project = getColumnValue(item, 'Project', 'dropdown_mm26tzy4');
       
@@ -603,7 +603,7 @@ function Dashboard({ analytics }) {
                   <tbody>
                     {overviewFilteredItems.map((item) => {
                         const employeeName = getColumnValue(item, 'Employee name', 'dropdown_mm2641v5') || item.name;
-                        const manager = getColumnValue(item, 'Manager', 'dropdown_mm1zvc1j');
+                        const manager = getColumnValue(item, 'Manager', 'dropdown_mm3g96wg');
                         const status = getColumnValue(item, null, null, 'status');
                         const project = getColumnValue(item, 'Project', 'dropdown_mm26tzy4');
                         const startDateColumn = Object.values(item.columns || {}).find(col =>

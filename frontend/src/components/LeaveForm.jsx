@@ -63,7 +63,7 @@ function LeaveForm({ onSuccess }) {
         // Map fields from Employee Directory to form fields with option IDs
         // Only populate fields that have matching dropdown options
         const employeeNameId = findOptionId('dropdown_mm2641v5', details.employeeName);
-        const managerId = findOptionId('dropdown_mm1zvc1j', details.manager);
+        const managerId = findOptionId('dropdown_mm3g96wg', details.manager);
         const projectId = findOptionId('dropdown_mm26tzy4', details.project || details.team);
         
         setFormData(prev => ({
@@ -314,7 +314,7 @@ function LeaveForm({ onSuccess }) {
               required
             >
               <option value="">Select Manager</option>
-              {dropdownOptions['dropdown_mm1zvc1j']?.options?.map(option => (
+              {dropdownOptions['dropdown_mm3g96wg']?.options?.map(option => (
                 <option key={option.id} value={option.id}>
                   {option.label}
                 </option>
