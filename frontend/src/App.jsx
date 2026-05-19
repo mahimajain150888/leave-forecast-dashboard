@@ -5,8 +5,7 @@ import Dashboard from './components/Dashboard';
 import LeaveForm from './components/LeaveForm';
 import MyLeaves from './components/MyLeaves';
 import { Calendar, RefreshCw, AlertCircle, PlusCircle, User, BarChart3 } from 'lucide-react';
-
-const API_BASE_URL = '/api/dashboard';
+import { API_ENDPOINT } from './config';
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard');
@@ -22,8 +21,8 @@ function App() {
     
     try {
       const [analyticsRes, boardRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/analytics`),
-        axios.get(`${API_BASE_URL}/board`)
+        axios.get(`${API_ENDPOINT}/analytics`),
+        axios.get(`${API_ENDPOINT}/board`)
       ]);
 
       setAnalytics(analyticsRes.data.data);
@@ -47,7 +46,7 @@ function App() {
 
   const handleClearCache = async () => {
     try {
-      await axios.post(`${API_BASE_URL}/cache/clear`);
+      await axios.post(`${API_ENDPOINT}/cache/clear`);
       fetchData();
     } catch (err) {
       console.error('Error clearing cache:', err);

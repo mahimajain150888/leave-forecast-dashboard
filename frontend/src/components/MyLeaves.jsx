@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-  Calendar, Mail, Search, Edit2, Trash2, Save, X, 
-  Loader, AlertCircle, CheckCircle, Clock, CalendarCheck 
+import {
+  Calendar, Mail, Search, Edit2, Trash2, Save, X,
+  Loader, AlertCircle, CheckCircle, Clock, CalendarCheck
 } from 'lucide-react';
 import './MyLeaves.css';
-
-const API_BASE_URL = '/api/dashboard';
+import { API_ENDPOINT } from '../config';
 
 function MyLeaves({ onUpdate }) {
   const [employeeId, setEmployeeId] = useState(() => localStorage.getItem('userEmployeeId') || '');
@@ -34,7 +33,7 @@ function MyLeaves({ onUpdate }) {
     setError(null);
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/my-leaves`, {
+      const response = await axios.get(`${API_ENDPOINT}/my-leaves`, {
         params: { employeeId }
       });
       setLeaves(response.data.data);
@@ -82,7 +81,7 @@ function MyLeaves({ onUpdate }) {
     setError(null);
 
     try {
-      await axios.put(`${API_BASE_URL}/leave/${leaveId}`, editData);
+      await axios.put(`${API_ENDPOINT}/leave/${leaveId}`, editData);
       
       // Refresh leaves
       await fetchLeaves();
@@ -114,7 +113,7 @@ function MyLeaves({ onUpdate }) {
     setError(null);
 
     try {
-      await axios.delete(`${API_BASE_URL}/leave/${leaveId}`);
+      await axios.delete(`${API_ENDPOINT}/leave/${leaveId}`);
       
       // Refresh leaves
       await fetchLeaves();

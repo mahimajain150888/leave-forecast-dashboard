@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Calendar, Send, CheckCircle, AlertCircle, Loader, User, Search } from 'lucide-react';
 import './LeaveForm.css';
-
-const API_BASE_URL = '/api/dashboard';
+import { API_ENDPOINT } from '../config';
 
 function LeaveForm({ onSuccess }) {
   const [formData, setFormData] = useState({
@@ -27,7 +26,7 @@ function LeaveForm({ onSuccess }) {
   useEffect(() => {
     const fetchDropdownOptions = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/dropdown-options`);
+        const response = await axios.get(`${API_ENDPOINT}/dropdown-options`);
         if (response.data.success) {
           setDropdownOptions(response.data.data);
         }
@@ -49,7 +48,7 @@ function LeaveForm({ onSuccess }) {
     setError(null);
     
     try {
-      const response = await axios.get(`${API_BASE_URL}/employee/${employeeId}`);
+      const response = await axios.get(`${API_ENDPOINT}/employee/${employeeId}`);
       if (response.data.success) {
         const details = response.data.data;
         
@@ -183,7 +182,7 @@ function LeaveForm({ onSuccess }) {
     setSuccess(false);
 
     try {
-      await axios.post(`${API_BASE_URL}/submit`, formData);
+      await axios.post(`${API_ENDPOINT}/submit`, formData);
       
       setSuccess(true);
       
