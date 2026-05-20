@@ -148,7 +148,7 @@ function LeaveForm({ onSuccess }) {
       setError('Please select a project');
       return false;
     }
-    if (!formData.status && formData.status !== '0') {
+    if (formData.status === '' || formData.status === null || formData.status === undefined) {
       setError('Please select a status');
       return false;
     }
