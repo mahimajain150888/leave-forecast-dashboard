@@ -327,7 +327,7 @@ class DashboardController {
    */
   async submitLeave(req, res) {
     try {
-      const { employeeId, employeeName, startDate, endDate, description, manager, tower, project } = req.body;
+      const { employeeId, employeeName, startDate, endDate, description, manager, tower, project, status } = req.body;
 
       // Validate required fields
       if (!employeeId || !employeeName || !startDate || !endDate || !manager || !tower || !project) {
@@ -356,7 +356,8 @@ class DashboardController {
         description: description || '',
         manager,
         tower,
-        project
+        project,
+        status: status !== undefined ? status : '0' // Default to "Planned" if not provided
       });
 
       // Clear cache to reflect new data

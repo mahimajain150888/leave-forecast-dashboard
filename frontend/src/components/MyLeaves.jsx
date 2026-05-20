@@ -180,13 +180,19 @@ function MyLeaves({ onUpdate }) {
     const description = getDescription(leave);
     const isEditing = editingId === leave.id;
     const isDeleting = deleteConfirm === leave.id;
+    
+    // Get employee name from the leave object (added by backend)
+    const employeeName = leave.employeeName || leave.name;
 
     return (
       <div key={leave.id} className={`leave-card ${isPast ? 'past' : 'upcoming'}`}>
         <div className="leave-card-header">
           <div className="leave-title">
             <Calendar size={20} />
-            <h3>{leave.name}</h3>
+            <h3>{employeeName}</h3>
+            {leave.employeeName && leave.name !== leave.employeeName && (
+              <span className="employee-id-badge">ID: {leave.name}</span>
+            )}
           </div>
           <span className={`status-badge status-${status.toLowerCase()}`}>
             {status}
@@ -320,7 +326,7 @@ function MyLeaves({ onUpdate }) {
             type="text"
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
-            placeholder="Enter your employee ID"
+            placeholder="Enter your employee ID (case-insensitive)"
             disabled={loading}
           />
         </div>

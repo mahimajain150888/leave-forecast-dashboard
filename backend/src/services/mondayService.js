@@ -374,7 +374,7 @@ class MondayService {
    * Create a new vacation item on the board
    */
   async createVacationItem(itemData) {
-    const { employeeId, employeeName, startDate, endDate, description, manager, tower, project } = itemData;
+    const { employeeId, employeeName, startDate, endDate, description, manager, tower, project, status } = itemData;
 
     // First, get board info to find the correct column IDs
     const boardInfo = await this.getBoardInfo();
@@ -392,7 +392,7 @@ class MondayService {
 
     // Find dropdown columns by exact column IDs we know from the board
     const employeeNameColumn = boardInfo.columns.find(col => col.id === 'dropdown_mm2641v5');
-    const managerColumn = boardInfo.columns.find(col => col.id === 'dropdown_mm1zvc1j');
+    const managerColumn = boardInfo.columns.find(col => col.id === 'dropdown_mm3g96wg'); // Fixed: was dropdown_mm1zvc1j
     const towerColumn = boardInfo.columns.find(col => col.id === 'dropdown_mm1zge2q');
     const projectColumn = boardInfo.columns.find(col => col.id === 'dropdown_mm26tzy4');
 
@@ -445,9 +445,10 @@ class MondayService {
       }
     }
 
-    // Set status to "Planned" (required field) - use index as string
+    // Set status (required field) - use provided status or default to "Planned"
     if (statusColumn) {
-      columnValues[statusColumn.id] = { index: 0 }; // 0 is "Planned"
+      const statusIndex = status !== undefined ? parseInt(status) : 0;
+      columnValues[statusColumn.id] = { index: statusIndex };
     }
     
     // Set location to "Offshore" by default (required field) - use index as string
@@ -602,10 +603,12 @@ class MondayService {
     const items = await this.getVacationItems();
     const parsedItems = await this.parseVacationData(items);
 
-    // Filter items that match the employee ID in the item name
+    // Filter items that match the employee ID in the item name (case-insensitive)
     const userItems = parsedItems.filter(item => {
-      // Check if employee ID matches the item name
-      return item.name === employeeId || item.name.includes(employeeId);
+      // Check if employee ID matches the item name (case-insensitive)
+      const itemNameLower = (item.name || '').toLowerCase();
+      const employeeIdLower = (employeeId || '').toLowerCase();
+      return itemNameLower === employeeIdLower || itemNameLower.includes(employeeIdLower);
     });
 
     // Separate into past and upcoming
@@ -614,23 +617,38 @@ class MondayService {
     const upcoming = [];
 
     userItems.forEach(item => {
-      const dateColumns = Object.values(item.columns).filter(
-        col => col.type === 'date' || col.type === 'timerange'
+      // Get employee name from dropdown column
+      const employeeNameColumn = Object.values(item.columns).find(col =>
+        col.id === 'dropdown_mm2641v5' || col.title === 'Employee name'
+      );
+      const employeeName = employeeNameColumn?.value || item.name || 'Unknown';
+
+      // Get end date to determine if past or upcoming
+      const endDateColumn = Object.values(item.columns).find(col =>
+        col.id === 'date_mm1zqm6a' || col.title === 'End Date'
+      );
+      const startDateColumn = Object.values(item.columns).find(col =>
+        col.id === 'date4' || col.title === 'Start Date'
       );
 
       let endDate = null;
-      dateColumns.forEach(dateCol => {
-        if (dateCol.type === 'timerange' && typeof dateCol.value === 'object') {
-          endDate = new Date(dateCol.value.to);
-        } else if (dateCol.type === 'date' && dateCol.value) {
-          endDate = new Date(dateCol.value);
-        }
-      });
+      if (endDateColumn && endDateColumn.value) {
+        endDate = new Date(endDateColumn.value);
+      } else if (startDateColumn && startDateColumn.value) {
+        // If no end date, use start date
+        endDate = new Date(startDateColumn.value);
+      }
+
+      // Add employee name to item for display
+      const itemWithName = {
+        ...item,
+        employeeName
+      };
 
       if (endDate && endDate < now) {
-        past.push(item);
+        past.push(itemWithName);
       } else {
-        upcoming.push(item);
+        upcoming.push(itemWithName);
       }
     });
 

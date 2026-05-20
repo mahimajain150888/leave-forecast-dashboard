@@ -12,9 +12,11 @@ function LeaveForm({ onSuccess }) {
     endDate: '',
     manager: '',
     tower: '',
-    project: ''
+    project: '',
+    status: '0' // Default to "Planned" (index 0)
   });
   const [dropdownOptions, setDropdownOptions] = useState({});
+  const [statusOptions, setStatusOptions] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(true);
   const [loading, setLoading] = useState(false);
   const [lookingUp, setLookingUp] = useState(false);
@@ -29,6 +31,21 @@ function LeaveForm({ onSuccess }) {
         const response = await axios.get(`${API_ENDPOINT}/dropdown-options`);
         if (response.data.success) {
           setDropdownOptions(response.data.data);
+        }
+        
+        // Fetch board info to get status column options
+        const boardResponse = await axios.get(`${API_ENDPOINT}/board-info`);
+        if (boardResponse.data.success) {
+          const statusColumn = boardResponse.data.data.columns.find(col => col.id === 'status');
+          if (statusColumn && statusColumn.settings_str) {
+            const settings = JSON.parse(statusColumn.settings_str);
+            if (settings.labels) {
+              setStatusOptions(settings.labels.map((label, index) => ({
+                index: index,
+                label: label.name || label
+              })));
+            }
+          }
         }
       } catch (err) {
         console.error('Error fetching dropdown options:', err);
@@ -131,6 +148,10 @@ function LeaveForm({ onSuccess }) {
       setError('Please select a project');
       return false;
     }
+    if (!formData.status && formData.status !== '0') {
+      setError('Please select a status');
+      return false;
+    }
     if (!formData.startDate) {
       setError('Please select a start date');
       return false;
@@ -192,7 +213,8 @@ function LeaveForm({ onSuccess }) {
         employeeName: formData.employeeName,
         manager: formData.manager,
         tower: formData.tower,
-        project: formData.project
+        project: formData.project,
+        status: formData.status
       };
       
       // Clear only date fields, keep user info for next submission
@@ -367,7 +389,32 @@ function LeaveForm({ onSuccess }) {
           </div>
 
           <div className="form-group">
-            {/* Empty space for layout balance */}
+            <label htmlFor="status">
+              Status <span className="required">*</span>
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              disabled={loading || loadingOptions}
+              required
+            >
+              {statusOptions.length > 0 ? (
+                statusOptions.map(option => (
+                  <option key={option.index} value={option.index}>
+                    {option.label}
+                  </option>
+                ))
+              ) : (
+                <>
+                  <option value="0">Planned</option>
+                  <option value="1">Approved</option>
+                  <option value="2">Pending</option>
+                  <option value="3">Rejected</option>
+                </>
+              )}
+            </select>
           </div>
         </div>
 

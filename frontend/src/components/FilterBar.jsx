@@ -1,18 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, X, Filter, Calendar } from 'lucide-react';
 import './FilterBar.css';
 
 function FilterBar({ filters, onFilterChange, availableManagers, availableStatuses, availableProjects }) {
   const [localSearchText, setLocalSearchText] = useState(filters.searchText);
-  const [managerInput, setManagerInput] = useState('');
-  const [statusInput, setStatusInput] = useState('');
-  const [projectInput, setProjectInput] = useState('');
-  const [showManagerSuggestions, setShowManagerSuggestions] = useState(false);
-  const [showStatusSuggestions, setShowStatusSuggestions] = useState(false);
-  const [showProjectSuggestions, setShowProjectSuggestions] = useState(false);
-  const managerInputRef = useRef(null);
-  const statusInputRef = useRef(null);
-  const projectInputRef = useRef(null);
 
   // Debounce search input
   useEffect(() => {
@@ -25,83 +16,19 @@ function FilterBar({ filters, onFilterChange, availableManagers, availableStatus
     return () => clearTimeout(timer);
   }, [localSearchText]);
 
-  // Filter suggestions based on input
-  const filteredManagerSuggestions = availableManagers.filter(manager =>
-    manager.toLowerCase().includes(managerInput.toLowerCase()) &&
-    !filters.managers.includes(manager)
-  );
-
-  const filteredStatusSuggestions = availableStatuses.filter(status =>
-    status.toLowerCase().includes(statusInput.toLowerCase()) &&
-    !filters.statuses.includes(status)
-  );
-
-  const filteredProjectSuggestions = availableProjects.filter(project =>
-    project.toLowerCase().includes(projectInput.toLowerCase()) &&
-    !filters.projects.includes(project)
-  );
-
-  // Handle clicking outside to close suggestions
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (managerInputRef.current && !managerInputRef.current.contains(event.target)) {
-        setShowManagerSuggestions(false);
-      }
-      if (statusInputRef.current && !statusInputRef.current.contains(event.target)) {
-        setShowStatusSuggestions(false);
-      }
-      if (projectInputRef.current && !projectInputRef.current.contains(event.target)) {
-        setShowProjectSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleManagerSelect = (manager) => {
-    if (!filters.managers.includes(manager)) {
-      onFilterChange({ ...filters, managers: [...filters.managers, manager] });
-    }
-    setManagerInput('');
-    setShowManagerSuggestions(false);
+  const handleManagerChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    onFilterChange({ ...filters, managers: selectedOptions });
   };
 
-  const handleStatusSelect = (status) => {
-    if (!filters.statuses.includes(status)) {
-      onFilterChange({ ...filters, statuses: [...filters.statuses, status] });
-    }
-    setStatusInput('');
-    setShowStatusSuggestions(false);
+  const handleStatusChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    onFilterChange({ ...filters, statuses: selectedOptions });
   };
 
-  const handleManagerRemove = (manager) => {
-    onFilterChange({
-      ...filters,
-      managers: filters.managers.filter(m => m !== manager)
-    });
-  };
-
-  const handleStatusRemove = (status) => {
-    onFilterChange({
-      ...filters,
-      statuses: filters.statuses.filter(s => s !== status)
-    });
-  };
-
-  const handleProjectSelect = (project) => {
-    if (!filters.projects.includes(project)) {
-      onFilterChange({ ...filters, projects: [...filters.projects, project] });
-    }
-    setProjectInput('');
-    setShowProjectSuggestions(false);
-  };
-
-  const handleProjectRemove = (project) => {
-    onFilterChange({
-      ...filters,
-      projects: filters.projects.filter(p => p !== project)
-    });
+  const handleProjectChange = (e) => {
+    const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+    onFilterChange({ ...filters, projects: selectedOptions });
   };
 
   const handleDateChange = (field, value) => {
@@ -116,9 +43,6 @@ function FilterBar({ filters, onFilterChange, availableManagers, availableStatus
 
   const handleClearFilters = () => {
     setLocalSearchText('');
-    setManagerInput('');
-    setStatusInput('');
-    setProjectInput('');
     onFilterChange({
       searchText: '',
       managers: [],
@@ -175,154 +99,79 @@ function FilterBar({ filters, onFilterChange, availableManagers, availableStatus
           />
         </div>
 
-        {/* Manager Autocomplete */}
-        <div className="filter-control autocomplete-control" ref={managerInputRef}>
+        {/* Manager Multi-Select Dropdown */}
+        <div className="filter-control">
           <label htmlFor="filter-manager">
             Manager
             {filters.managers.length > 0 && (
-              <span className="selected-count">({filters.managers.length})</span>
+              <span className="selected-count">({filters.managers.length} selected)</span>
             )}
           </label>
-          <input
+          <select
             id="filter-manager"
-            type="text"
-            placeholder="Type to search managers..."
-            value={managerInput}
-            onChange={(e) => {
-              setManagerInput(e.target.value);
-              setShowManagerSuggestions(true);
-            }}
-            onFocus={() => setShowManagerSuggestions(true)}
-            className="filter-input autocomplete-input"
-          />
-          {showManagerSuggestions && filteredManagerSuggestions.length > 0 && (
-            <div className="suggestions-dropdown">
-              {filteredManagerSuggestions.map(manager => (
-                <div
-                  key={manager}
-                  className="suggestion-item"
-                  onClick={() => handleManagerSelect(manager)}
-                >
-                  {manager}
-                </div>
-              ))}
-            </div>
-          )}
-          {filters.managers.length > 0 && (
-            <div className="selected-items">
-              {filters.managers.map(manager => (
-                <span key={manager} className="selected-tag">
-                  {manager}
-                  <button
-                    onClick={() => handleManagerRemove(manager)}
-                    className="remove-tag"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+            multiple
+            value={filters.managers}
+            onChange={handleManagerChange}
+            className="filter-select"
+            size="5"
+          >
+            {availableManagers.map(manager => (
+              <option key={manager} value={manager}>
+                {manager}
+              </option>
+            ))}
+          </select>
+          <p className="filter-hint">Hold Ctrl/Cmd to select multiple</p>
         </div>
 
-        {/* Status Autocomplete */}
-        <div className="filter-control autocomplete-control" ref={statusInputRef}>
+        {/* Status Multi-Select Dropdown */}
+        <div className="filter-control">
           <label htmlFor="filter-status">
             Status
             {filters.statuses.length > 0 && (
-              <span className="selected-count">({filters.statuses.length})</span>
+              <span className="selected-count">({filters.statuses.length} selected)</span>
             )}
           </label>
-          <input
+          <select
             id="filter-status"
-            type="text"
-            placeholder="Type to search statuses..."
-            value={statusInput}
-            onChange={(e) => {
-              setStatusInput(e.target.value);
-              setShowStatusSuggestions(true);
-            }}
-            onFocus={() => setShowStatusSuggestions(true)}
-            className="filter-input autocomplete-input"
-          />
-          {showStatusSuggestions && filteredStatusSuggestions.length > 0 && (
-            <div className="suggestions-dropdown">
-              {filteredStatusSuggestions.map(status => (
-                <div
-                  key={status}
-                  className="suggestion-item"
-                  onClick={() => handleStatusSelect(status)}
-                >
-                  {status}
-                </div>
-              ))}
-            </div>
-          )}
-          {filters.statuses.length > 0 && (
-            <div className="selected-items">
-              {filters.statuses.map(status => (
-                <span key={status} className="selected-tag">
-                  {status}
-                  <button
-                    onClick={() => handleStatusRemove(status)}
-                    className="remove-tag"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+            multiple
+            value={filters.statuses}
+            onChange={handleStatusChange}
+            className="filter-select"
+            size="4"
+          >
+            {availableStatuses.map(status => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+          <p className="filter-hint">Hold Ctrl/Cmd to select multiple</p>
         </div>
 
-        {/* Project Autocomplete */}
-        <div className="filter-control autocomplete-control" ref={projectInputRef}>
+        {/* Project Multi-Select Dropdown */}
+        <div className="filter-control">
           <label htmlFor="filter-project">
             Project
             {filters.projects.length > 0 && (
-              <span className="selected-count">({filters.projects.length})</span>
+              <span className="selected-count">({filters.projects.length} selected)</span>
             )}
           </label>
-          <input
+          <select
             id="filter-project"
-            type="text"
-            placeholder="Type to search projects..."
-            value={projectInput}
-            onChange={(e) => {
-              setProjectInput(e.target.value);
-              setShowProjectSuggestions(true);
-            }}
-            onFocus={() => setShowProjectSuggestions(true)}
-            className="filter-input autocomplete-input"
-          />
-          {showProjectSuggestions && filteredProjectSuggestions.length > 0 && (
-            <div className="suggestions-dropdown">
-              {filteredProjectSuggestions.map(project => (
-                <div
-                  key={project}
-                  className="suggestion-item"
-                  onClick={() => handleProjectSelect(project)}
-                >
-                  {project}
-                </div>
-              ))}
-            </div>
-          )}
-          {filters.projects.length > 0 && (
-            <div className="selected-items">
-              {filters.projects.map(project => (
-                <span key={project} className="selected-tag">
-                  {project}
-                  <button
-                    onClick={() => handleProjectRemove(project)}
-                    className="remove-tag"
-                  >
-                    <X size={12} />
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+            multiple
+            value={filters.projects}
+            onChange={handleProjectChange}
+            className="filter-select"
+            size="5"
+          >
+            {availableProjects.map(project => (
+              <option key={project} value={project}>
+                {project}
+              </option>
+            ))}
+          </select>
+          <p className="filter-hint">Hold Ctrl/Cmd to select multiple</p>
         </div>
 
         {/* Date Range Filter */}
