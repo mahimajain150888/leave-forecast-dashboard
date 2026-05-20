@@ -199,7 +199,7 @@ class MondayService {
 
       // Get manager from dropdown column
       const managerColumn = Object.values(item.columns).find(col =>
-        col.title === 'Manager' || col.id === 'dropdown_mm1zvc1j'
+        col.title === 'Manager' || col.id === 'dropdown_mm3g96wg'
       );
       const manager = managerColumn?.value || 'Unassigned';
 
@@ -209,9 +209,17 @@ class MondayService {
       );
       const forecastWindow = forecastWindowColumn?.value || 'Not Set';
 
-      // Count by manager
-      if (manager) {
-        stats.byManager[manager] = (stats.byManager[manager] || 0) + 1;
+      // Calculate duration and count by manager
+      if (manager && startDateValue && endDateValue) {
+        const startDate = new Date(startDateValue);
+        const endDate = new Date(endDateValue);
+        const durationDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        
+        if (!stats.byManager[manager]) {
+          stats.byManager[manager] = { count: 0, totalDays: 0 };
+        }
+        stats.byManager[manager].count += 1;
+        stats.byManager[manager].totalDays += durationDays;
       }
 
       // Count by forecast window
