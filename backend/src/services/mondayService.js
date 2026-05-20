@@ -209,6 +209,17 @@ class MondayService {
       );
       const forecastWindow = forecastWindowColumn?.value || 'Not Set';
 
+      // Get start and end dates
+      const startDateColumn = Object.values(item.columns).find(col =>
+        col.id === 'date4' || col.title === 'Start Date'
+      );
+      const endDateColumn = Object.values(item.columns).find(col =>
+        col.id === 'date_mm1zqm6a' || col.title === 'End Date'
+      );
+      
+      const startDateValue = startDateColumn?.value;
+      const endDateValue = endDateColumn?.value;
+
       // Calculate duration and count by manager
       if (manager && startDateValue && endDateValue) {
         const startDate = new Date(startDateValue);
@@ -227,14 +238,7 @@ class MondayService {
         stats.byForecastWindow[forecastWindow] = (stats.byForecastWindow[forecastWindow] || 0) + 1;
       }
 
-      // Get specific Start Date and End Date columns
-      const startDateColumn = Object.values(item.columns).find(col =>
-        col.id === 'date4' || col.title === 'Start Date'
-      );
-      const endDateColumn = Object.values(item.columns).find(col =>
-        col.id === 'date_mm1zqm6a' || col.title === 'End Date'
-      );
-
+      // Parse dates for other calculations (already retrieved above for manager stats)
       let startDate = null;
       let endDate = null;
 
